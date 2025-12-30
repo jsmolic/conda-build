@@ -291,6 +291,7 @@ def skeletonize(
     if output_dir != ".":
         output_dir = expanduser(output_dir)
         kwargs.update({"output_dir": output_dir})
+    
 
     # here we're dumping all extra kwargs as attributes on the config object.  We'll extract
     #    only relevant ones below
@@ -317,6 +318,7 @@ def skeletonize(
     for arg in skeletonize.__code__.co_varnames:
         if arg in kwargs:
             del kwargs[arg]
+    
     with config:
         module.skeletonize(
             packages,
