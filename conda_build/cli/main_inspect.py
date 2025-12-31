@@ -13,6 +13,8 @@ from conda.base.context import context
 
 from .. import api
 
+from rattler_build import Package
+
 try:
     from conda.cli.helpers import add_parser_prefix
 except ImportError:
@@ -216,13 +218,23 @@ def execute(args: Sequence[str] | None = None) -> int:
         parser.print_help()
         sys.exit(0)
     elif parsed.subcommand == "rattler":
-        cmd = ["rattler-build", "package", "inspect", *parsed.packages]
-        try:
-            subprocess.run(cmd, text=True, check=True)
-            return 0
-        except subprocess.CalledProcessError as e:
-            print(f"rattler-build failed: {e}", file=sys.stderr)
-            return e.returncode
+        pkg = Package.from_file(*parsed.packages)
+
+        for attr in dir(pkg):
+            if not attr.startswith("__"):
+                try:
+                    value = getattr(pkg, attr)
+                except Exception:
+                    value = "<unaccessible>"
+                print(f"{attr}: {value}")
+
+        #cmd = ["rattler-build", "package", "inspect", *parsed.packages]
+        #try:
+        #    subprocess.run(cmd, text=True, check=True)
+        #    return 0
+        #except subprocess.CalledProcessError as e:
+        #    print(f"rattler-build failed: {e}", file=sys.stderr)
+        #    return e.returncode
     elif parsed.subcommand == "channels":
         print(api.test_installable(parsed.channel))
     elif parsed.subcommand == "linkages":
