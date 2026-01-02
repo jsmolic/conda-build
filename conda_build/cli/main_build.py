@@ -7,6 +7,7 @@ import logging
 import subprocess
 import sys
 import warnings
+import os
 from glob import glob
 from itertools import chain
 from os.path import abspath, expanduser, expandvars, join
@@ -29,6 +30,16 @@ from ..utils import LoggingContext, is_v1_recipe
 from .actions import KeyValueAction, PackageTypeNormalize
 from .main_render import get_render_parser
 
+from rattler_build.progress import RichProgressCallback
+from rattler_build.render import RenderConfig
+
+# Import rattler_build components
+from rattler_build.stage0 import Stage0Recipe
+from rattler_build.tool_config import PlatformConfig
+from rattler_build.variant_config import VariantConfig
+from rattler_build.tool_config import ToolConfiguration
+from rattler_build.render import build_rendered_variants
+
 try:
     from conda.cli.helpers import add_parser_channels
 except ImportError:
@@ -46,31 +57,84 @@ if TYPE_CHECKING:
 def run_rattler_build(recipe_dir: Path, parsed_args, config) -> int:
     """Run rattler-build for v1 recipes"""
     recipe_file = recipe_dir / "recipe.yaml"
-    cmd = ["rattler-build", "build", "--recipe", str(recipe_file)]
+
+    print(recipe_file)
+
+    # Load the recipe
+    recipe = Stage0Recipe.from_file(str(recipe_file))
+
+    print(recipe)
+
+    print(parsed_args.variant_config_files)
 
     if parsed_args.variant_config_files:
         variants_path = join(*parsed_args.variant_config_files)
-        cmd.extend(["-m", str(variants_path)])
-
-    if parsed_args.output_folder:
-        cmd.extend(["--output-dir", parsed_args.output_folder])
-    if parsed_args.notest:
-        cmd.extend(["--test", "skip"])
-    if parsed_args.quiet:
-        cmd.extend(["-q"])
-    if parsed_args.skip_existing:
-        cmd.extend(["--skip-existing"])
-    if parsed_args.debug:
-        cmd.extend(["--verbose"])
+        print(variants_path)
+        variant_config = VariantConfig.from_file(variants_path)
+    else:
+        variant_config = VariantConfig()
+    
     if not parsed_args.set_build_id:
-        cmd.extend(["--no-build-id"])
+        no_build_id: bool = True
+    else:
+        no_build_id: bool = False
 
-    try:
-        subprocess.run(cmd, check=True, text=True)
-        return 0
-    except subprocess.CalledProcessError as e:
-        print(f"rattler-build failed: {e}", file=sys.stderr)
-        return e.returncode
+    config = ToolConfiguration(
+        continue_on_failure=False,
+        keep_build=True,
+        test_strategy="skip"
+    )
+
+    rendered = recipe.render(variant_config)
+
+    print(variant_config)
+
+
+    results=[]
+    for variant in rendered:
+        result = variant.run_build(
+            debug=False,
+            tool_config=config,
+            recipe_path=recipe_file
+        )
+        results.append(result)
+    
+    print(results[0])
+
+
+    #print(config)
+
+    #results = build_rendered_variants(rendered, output_dir="./output")
+
+    #print(rendered)
+
+
+
+    #cmd = ["rattler-build", "build", "--recipe", str(recipe_file)]
+
+    # if parsed_args.variant_config_files:
+    #     variants_path = join(*parsed_args.variant_config_files)
+    #     cmd.extend(["-m", str(variants_path)])
+
+    # if parsed_args.output_folder:
+    #     cmd.extend(["--output-dir", parsed_args.output_folder])
+    # if parsed_args.notest:
+    #     cmd.extend(["--test", "skip"])
+    # if parsed_args.quiet:
+    #     cmd.extend(["-q"])
+    # if parsed_args.skip_existing:
+    #     cmd.extend(["--skip-existing"])
+    # if parsed_args.debug:
+    #     cmd.extend(["--verbose"])
+    # if not parsed_args.set_build_id:
+    #     cmd.extend(["--no-build-id"])
+
+    # try:
+    #     subprocess.run(cmd, check=True, text=True)
+    #     return 0
+    # except subprocess.CalledProcessError as e:
+    #     print(f"rattler-build failed: {e}", file=sys.stderr)
+    #     return e.returncode
 
 
 def parse_args(args: Sequence[str] | None) -> tuple[ArgumentParser, Namespace]:
