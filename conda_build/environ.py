@@ -123,6 +123,21 @@ def get_lua_include_dir(config):
     return join(config.host_prefix, "include")
 
 
+def _ensure_pip_when_python_requested(
+    specs, add_pip_as_python_dependency, disable_pip=False
+):
+    if disable_pip or not add_pip_as_python_dependency:
+        return specs
+
+    has_python = any(MatchSpec(str(spec)).name == "python" for spec in specs)
+    has_pip = any(MatchSpec(str(spec)).name == "pip" for spec in specs)
+
+    if has_python and not has_pip:
+        specs = list(specs)
+        specs.append("pip")
+    return specs
+
+
 @cache
 def verify_git_repo(
     git_exe, git_dir, git_url, git_commits_since_tag, debug=False, expected_rev="HEAD"
@@ -841,6 +856,7 @@ def get_install_actions(
     bldpkgs_dirs=None,
     timeout=900,
     disable_pip: bool = False,
+    add_pip_as_python_dependency: bool = False,
     max_env_retry: int = 3,
     output_folder=None,
     channel_urls=None,
@@ -862,6 +878,12 @@ def get_install_actions(
     for feature, value in feature_list:
         if value:
             specs.append(f"{feature}@")
+
+    specs = _ensure_pip_when_python_requested(
+        specs,
+        add_pip_as_python_dependency=add_pip_as_python_dependency,
+        disable_pip=disable_pip,
+    )
 
     bldpkgs_dirs = ensure_list(bldpkgs_dirs)
 
@@ -954,6 +976,7 @@ def get_install_actions(
                             bldpkgs_dirs=tuple(bldpkgs_dirs),
                             timeout=timeout,
                             disable_pip=disable_pip,
+                            add_pip_as_python_dependency=add_pip_as_python_dependency,
                             max_env_retry=max_env_retry,
                             output_folder=output_folder,
                             channel_urls=tuple(channel_urls),
@@ -1158,6 +1181,9 @@ def create_env(
                             bldpkgs_dirs=tuple(config.bldpkgs_dirs),
                             timeout=config.timeout,
                             disable_pip=config.disable_pip,
+                            add_pip_as_python_dependency=getattr(
+                                config, "add_pip_as_python_dependency", False
+                            ),
                             max_env_retry=config.max_env_retry,
                             output_folder=config.output_folder,
                             channel_urls=tuple(config.channel_urls),
@@ -1374,6 +1400,9 @@ def get_pinned_deps(m, section):
             bldpkgs_dirs=tuple(m.config.bldpkgs_dirs),
             timeout=m.config.timeout,
             disable_pip=m.config.disable_pip,
+            add_pip_as_python_dependency=getattr(
+                m.config, "add_pip_as_python_dependency", False
+            ),
             max_env_retry=m.config.max_env_retry,
             output_folder=m.config.output_folder,
             channel_urls=tuple(m.config.channel_urls),
