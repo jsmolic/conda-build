@@ -1,7 +1,6 @@
-import os
-import sys
-from glob import glob
 import json
+import os
+from glob import glob
 
 
 def main():

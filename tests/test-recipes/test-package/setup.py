@@ -1,4 +1,5 @@
 import sys
+
 from setuptools import setup
 
 # test with an old version of Python that we'll never normally use

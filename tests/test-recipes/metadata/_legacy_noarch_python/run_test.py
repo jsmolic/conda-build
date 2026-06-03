@@ -1,6 +1,6 @@
-from glob import glob
 import os
 import subprocess
+from glob import glob
 
 import noarch_test_package
 

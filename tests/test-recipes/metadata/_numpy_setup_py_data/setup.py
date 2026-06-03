@@ -1,6 +1,4 @@
-import setuptools
 import numpy.distutils.core
-from Cython.Build import cythonize
 
 requirements = [
     "numpy>=1.9.0",

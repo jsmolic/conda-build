@@ -1,5 +1,6 @@
-from setuptools import setup
 from os.path import join
+
+from setuptools import setup
 
 setup(name='lsfm',
       version="1.0",

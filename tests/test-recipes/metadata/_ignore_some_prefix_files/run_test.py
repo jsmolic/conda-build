@@ -1,5 +1,5 @@
-from glob import glob
 import os
+from glob import glob
 
 pkgs = os.path.join(os.environ["ROOT"], "pkgs")
 pkg_dir = glob(os.path.join(pkgs, "conda-build-test-ignore-some-prefix-files-1.0-0"))[0]

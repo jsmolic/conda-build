@@ -1,4 +1,5 @@
 import os
+
 f = os.path.join(os.getenv('PREFIX'), 'no_link_file.example')
 assert os.path.isfile(f), "File does not exist"
 assert os.stat(f).st_nlink <= 1, f"File is hard-linked where it should not be (link count = {os.stat(f).st_nlink})"

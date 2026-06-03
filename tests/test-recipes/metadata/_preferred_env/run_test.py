@@ -1,6 +1,6 @@
-from glob import glob
 import json
 import os
+from glob import glob
 
 pkgs_dir = os.path.abspath(os.path.join(os.environ["ROOT"], 'pkgs'))
 pkg_dir = glob(os.path.join(pkgs_dir, "preferred_env_test_package-1.0-h*_0"))[0]

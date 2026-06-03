@@ -1,6 +1,6 @@
 import os
-import re, itertools
 from os.path import join
+
 prefix = os.environ['PREFIX']
 fn = os.path.join(prefix, 'mixed-slash-prefix')
 the_sep = '\\' if '\\' in prefix else '/'

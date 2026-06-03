@@ -1,6 +1,6 @@
+import json
 import os
 from glob import glob
-import json
 
 
 def main():

@@ -14,7 +14,8 @@ def main():
         prefix = os.environ['PREFIX']
         prefix = prefix.encode(encoding)
         fn = os.path.join(
-            prefix, 'binary-has-prefix-{encoding}'.format(encoding=encoding)
+            prefix, f'binary-has-prefix-{encoding}'
+        )
         with open(fn, 'rb') as f:
             data = f.read()
         print(data)

@@ -1,6 +1,7 @@
-from glob import glob
-import os
 import json
+import os
+from glob import glob
+
 import yaml
 
 

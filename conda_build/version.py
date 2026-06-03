@@ -30,11 +30,12 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 import re
-from typing import Iterator, List, Tuple, Union
+from collections.abc import Iterator
+from typing import Union
 
 from packaging.version import InvalidVersion, Version, _BaseVersion
 
-LegacyCmpKey = Tuple[int, Tuple[str, ...]]
+LegacyCmpKey = tuple[int, tuple[str, ...]]
 
 
 def _parse(version: str) -> Union["_LegacyVersion", "Version"]:
@@ -142,7 +143,7 @@ def _legacy_cmpkey(version: str) -> LegacyCmpKey:
 
     # This scheme is taken from pkg_resources.parse_version setuptools prior to
     # it's adoption of the packaging library.
-    parts: List[str] = []
+    parts: list[str] = []
     for part in _parse_version_parts(version.lower()):
         if part.startswith("*"):
             # remove "-" before a prerelease tag

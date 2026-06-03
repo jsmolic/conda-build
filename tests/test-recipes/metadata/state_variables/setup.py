@@ -1,4 +1,5 @@
 import os
+
 from setuptools import setup
 
 if not os.getenv("CONDA_BUILD_STATE") == "RENDER":
